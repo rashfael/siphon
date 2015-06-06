@@ -1,0 +1,18 @@
+require 'coffee-script/register'
+mongoose = require 'mongoose'
+mongoose.connect 'mongodb://localhost/shack-hq'
+User = require './app/schemas/User'
+
+addUser = (name, password) =>
+	newUser = new User()
+	newUser.name = name
+	newUser.password = password
+	newUser.save (err, user) =>
+		if err
+			console.log "problem: #{err.err}"
+		else
+			console.log "saved #{user.name}"
+
+task 'dbseed', 'Seed database with two users', ->
+	addUser 'bob', 'secret'
+	addUser 'admin', 'secret'

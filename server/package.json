@@ -1,0 +1,24 @@
+{
+  "author": "Your Name",
+  "name": "package-name",
+  "description": "Package description",
+  "version": "0.0.1",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "main": "bin/server.js",
+  "engines": {
+    "node": "0.10"
+  },
+  "dependencies": {
+    "coffee-script": "^1.9.3",
+    "gridfs-stream": "^1.1.1",
+    "koa.io": "0.0.3",
+    "mongoose": "^4.0.5",
+  },
+  "devDependencies": {
+    "js2coffee": "^0.3.5"
+  }
+}
