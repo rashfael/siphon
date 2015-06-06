@@ -7,6 +7,7 @@ fs = require 'fs'
 mongoose = require 'mongoose'
 Grid = require 'gridfs-stream'
 
+clientPublicDir = path.normalize __dirname + '/../../web-client/public'
 mongoCon = mongoose.createConnection 'mongodb://localhost/siphon'
 
 gfs = null
@@ -16,12 +17,15 @@ mongoCon.once 'open', ->
 
 
 koa = require 'koa.io'
-koaStatic = require 'koa-static'
 
 app = koa()
+app.use require('koa-static') clientPublicDir
+app.use require('koa-logger')()
+app.use require('koa-json')()
+
 router = require('koa-router')()
 koaBody = require('koa-body')()
-koaJSON = require('koa-json')()
+
 request = require 'request'
 
 router.get '/objects/:id', (next) ->
@@ -38,10 +42,7 @@ router.post '/objects', koaBody, (next) ->
 
 	file = yield new Promise (resolve, reject) ->
 		try
-			writestream = gfs.createWriteStream
-				metadata:
-					url: url
-			
+			writestream = gfs.createWriteStream	metadata:	url: url
 			writestream.on 'close', resolve
 			writestream.on 'error', reject
 			request(url).on 'error', reject
@@ -52,12 +53,6 @@ router.post '/objects', koaBody, (next) ->
 	@body = file
 	yield next
 
-
-
-clientPublicDir = path.normalize __dirname + '/../../web-client/public'
-
-app.use koaStatic clientPublicDir
-app.use koaJSON
 app.use router.routes()
 app.use router.allowedMethods()
 
