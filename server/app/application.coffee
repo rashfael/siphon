@@ -41,14 +41,19 @@ router.post '/objects', koaBody, (next) ->
 	url = @request.body.url
 
 	file = yield new Promise (resolve, reject) ->
-		try
-			writestream = gfs.createWriteStream	metadata:	url: url
-			writestream.on 'close', resolve
+		log.info 'scraping', url
+		req = request url
+		req.on 'error', reject
+		req.on 'response', (response) ->
+			unless response.statusCode is 200
+				return reject new Error 'Bad Scraping Response: "' + response.statusCode + ' ' + response.statusMessage + '"'
+			writestream = gfs.createWriteStream
+				content_type: response.headers['content-type']
+				filename: url
+			writestream.on 'close',	resolve
 			writestream.on 'error', reject
-			request(url).on 'error', reject
-			.pipe writestream
-		catch err
-			return reject err
+			req.pipe writestream
+		
 
 	@body = file
 	yield next
