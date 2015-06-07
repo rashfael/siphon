@@ -11,10 +11,8 @@ clientPublicDir = path.normalize __dirname + '/../../web-client/public'
 mongoCon = mongoose.createConnection 'mongodb://localhost/siphon'
 
 gfs = null
-
 mongoCon.once 'open', ->
   gfs = Grid mongoCon.db, mongoose.mongo
-
 
 koa = require 'koa.io'
 
@@ -46,14 +44,13 @@ router.post '/objects', koaBody, (next) ->
 		req.on 'error', reject
 		req.on 'response', (response) ->
 			unless response.statusCode is 200
-				return reject new Error 'Bad Scraping Response: "' + response.statusCode + ' ' + response.statusMessage + '"'
+				return reject new Error "Bad Scraping Response: #{response.statusCode} #{response.statusMessage}"
 			writestream = gfs.createWriteStream
 				content_type: response.headers['content-type']
 				filename: url
 			writestream.on 'close',	resolve
 			writestream.on 'error', reject
 			req.pipe writestream
-		
 
 	@body = file
 	yield next
@@ -62,4 +59,4 @@ app.use router.routes()
 app.use router.allowedMethods()
 
 server = app.listen 9000, ->
-	log.info "Express server listening on port %d in %s mode", 9000
+	log.info "Express server listening on port %d", 9000
